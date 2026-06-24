@@ -874,3 +874,83 @@ This part demonstrates basic account policy review, password aging configuration
 Screenshot:
 
 ![screenshot-09-rhel-password-account-policy.png](screenshots/screenshot-09-rhel-password-account-policy.png)
+
+---
+
+## 2026-06-24 — Part 10: Audit and log review
+
+### Goal
+
+Review recent system logs and authentication-related records on the RHEL server.
+
+This part documents basic security operations review by checking sudo activity, SSH service logs, login history, active sessions, failed login records and recent audit login events.
+
+### Work completed
+
+* Reviewed recent sudo-related journal entries.
+* Reviewed recent SSH service journal entries.
+* Reviewed recent login history with `last`.
+* Checked currently logged-in users with `who`.
+* Checked failed login records with `faillock`.
+* Checked recent audit login events with `ausearch`.
+* Confirmed that the failed login review did not show failed entries for `restricteduser`.
+* Confirmed that the recent audit login search returned no matching `USER_LOGIN` events.
+* Saved screenshot evidence of the log and audit review.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Sudo log review | Completed |
+| SSH service log review | Completed |
+| Recent login history review | Completed |
+| Active user session review | Completed |
+| Failed login review | Completed |
+| `faillock` result | No failed entries shown for `restricteduser` |
+| Audit login search | Completed |
+| `ausearch` result | `<no matches>` for recent `USER_LOGIN` events |
+
+### Commands used
+
+```bash
+journalctl _COMM=sudo --no-pager | tail -n 20
+journalctl -u sshd --no-pager | tail -n 20
+last | head
+who
+sudo faillock
+sudo ausearch -m USER_LOGIN -ts recent
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `journalctl _COMM=sudo --no-pager \| tail -n 20` | Shows the most recent sudo-related journal entries without opening a pager. |
+| `journalctl -u sshd --no-pager \| tail -n 20` | Shows the most recent journal entries for the SSH server service. |
+| `last \| head` | Shows recent login sessions from the login history database. |
+| `who` | Shows users currently logged in to the system. |
+| `sudo faillock` | Shows failed authentication records tracked by faillock. |
+| `sudo ausearch -m USER_LOGIN -ts recent` | Searches recent audit logs for user login events. |
+
+### Notes
+
+The log review covered sudo activity, SSH service activity, recent login history, current logged-in users, failed authentication records and recent audit login events.
+
+The `journalctl` command was used because RHEL systems store many system and service logs in the systemd journal.
+
+The `last` command was used to review recent login sessions, while `who` was used to show currently active sessions.
+
+The `faillock` command showed the failed login tracking table. No failed entries were shown for `restricteduser`.
+
+The `ausearch` command was available and returned `<no matches>` for recent `USER_LOGIN` events. This means the query ran successfully, but no matching recent audit login events were found at the time of testing.
+
+This part demonstrates basic security log review and audit checking on a RHEL system.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-10a-rhel-sudo-ssh-logs.png](screenshots/screenshot-10a-rhel-sudo-ssh-logs.png)
+
+![screenshot-10b-rhel-login-audit-review.png](screenshots/screenshot-10b-rhel-login-audit-review.png)
+
