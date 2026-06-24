@@ -692,3 +692,93 @@ Screenshot:
 
 ![screenshot-07-rhel-selinux-basics.png](screenshots/screenshot-07-rhel-selinux-basics.png)
 
+---
+
+## 2026-06-24 — Part 8: Firewalld review
+
+### Goal
+
+Review the current RHEL firewall configuration with firewalld and verify that temporary port changes can be added and removed safely.
+
+This part documents the active firewall state, active zone, allowed services, open ports and a temporary test using TCP port 8080.
+
+### Work completed
+
+* Checked that firewalld is running.
+* Verified the active firewalld zone.
+* Verified that the active network interface is assigned to the public zone.
+* Reviewed the full active zone configuration with `firewall-cmd --list-all`.
+* Listed currently allowed firewalld services.
+* Checked for manually opened custom ports.
+* Temporarily opened TCP port 8080.
+* Verified that TCP port 8080 appeared in the open port list.
+* Removed TCP port 8080 again.
+* Verified that the custom port list was blank after removal.
+* Saved screenshot evidence of the firewalld review and temporary port test.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Firewall service | firewalld |
+| Firewall state | running |
+| Active zone | public |
+| Default zone shown | public |
+| Active interface | ens160 |
+| Allowed services | cockpit, dhcpv6-client, ssh |
+| Custom ports before test | None |
+| Temporary test port | 8080/tcp |
+| Port add result | success |
+| Port remove result | success |
+| Custom ports after test | None |
+| Permanent firewall changes made | No |
+
+### Commands used
+
+```bash
+sudo firewall-cmd --state
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --list-all
+sudo firewall-cmd --list-services
+sudo firewall-cmd --list-ports
+
+sudo firewall-cmd --add-port=8080/tcp
+sudo firewall-cmd --list-ports
+sudo firewall-cmd --remove-port=8080/tcp
+sudo firewall-cmd --list-ports
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `sudo firewall-cmd --state` | Checks whether firewalld is running. |
+| `sudo firewall-cmd --get-active-zones` | Shows active firewall zones and the network interfaces assigned to them. |
+| `sudo firewall-cmd --list-all` | Shows the full configuration of the active/default firewalld zone. |
+| `sudo firewall-cmd --list-services` | Lists firewalld services allowed in the current zone. |
+| `sudo firewall-cmd --list-ports` | Lists manually opened custom ports in the current zone. |
+| `sudo firewall-cmd --add-port=8080/tcp` | Temporarily opens TCP port 8080 in the active zone. |
+| `sudo firewall-cmd --remove-port=8080/tcp` | Removes the temporary TCP port 8080 opening. |
+
+### Notes
+
+Firewalld was running during the review.
+
+The active zone was `public`, and the active interface was `ens160`.
+
+The allowed services were `cockpit`, `dhcpv6-client` and `ssh`.
+
+No custom ports were open before the temporary test.
+
+TCP port 8080 was temporarily opened and verified with `firewall-cmd --list-ports`. The port was then removed, and the final port list returned blank again.
+
+No permanent firewall rule changes were made because the commands did not use the `--permanent` option.
+
+This part demonstrates basic firewall review, service inspection, temporary port testing and safe cleanup of temporary firewall changes.
+
+### Evidence
+
+Screenshot:
+
+![screenshot-08-rhel-firewalld-review.png](screenshots/screenshot-08-rhel-firewalld-review.png)
+
