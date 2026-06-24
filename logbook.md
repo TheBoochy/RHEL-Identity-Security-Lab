@@ -604,3 +604,91 @@ Screenshots:
 
 ![screenshot-06b-rhel-repository-status.png](screenshots/screenshot-06b-rhel-repository-status.png)
 
+---
+
+## 2026-06-24 — Part 7: SELinux basics
+
+### Goal
+
+Review the current SELinux status and inspect SELinux security contexts on the shared directory structure.
+
+This part documents SELinux enforcement status and shows how SELinux labels exist alongside normal Linux permissions.
+
+### Work completed
+
+* Checked the current SELinux mode with `getenforce`.
+* Reviewed detailed SELinux status with `sestatus`.
+* Verified that SELinux is enabled.
+* Verified that SELinux is running in enforcing mode.
+* Verified that the loaded SELinux policy is `targeted`.
+* Checked SELinux contexts on `/srv/company`.
+* Checked SELinux contexts on the shared company subdirectories.
+* Reviewed normal permissions and SELinux contexts together with `ls -ldZ`.
+* Saved screenshot evidence of the SELinux status and context review.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| SELinux status | enabled |
+| Current SELinux mode | enforcing |
+| Mode from config file | enforcing |
+| Loaded policy name | targeted |
+| Policy MLS status | enabled |
+| Max kernel policy version | 33 |
+| `/srv/company` context | `unconfined_u:object_r:var_t:s0` |
+| `/srv/company/development` context | `unconfined_u:object_r:var_t:s0` |
+| `/srv/company/audit` context | `unconfined_u:object_r:var_t:s0` |
+| `/srv/company/restricted` context | `unconfined_u:object_r:var_t:s0` |
+| `/srv/company/development` permissions | `drwxrws--- root developers` |
+| `/srv/company/audit` permissions | `drwxrws--- root auditors` |
+| `/srv/company/restricted` permissions | `drwxrws--- root restricted` |
+
+### Commands used
+
+```bash
+getenforce
+sestatus
+
+ls -Zd /srv/company
+ls -Zd /srv/company/development
+ls -Zd /srv/company/audit
+ls -Zd /srv/company/restricted
+
+ls -ldZ /srv/company /srv/company/development /srv/company/audit /srv/company/restricted
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `getenforce` | Shows the current SELinux mode. |
+| `sestatus` | Shows detailed SELinux status, policy and configuration information. |
+| `ls -Zd` | Shows the SELinux context for a directory. |
+| `ls -ldZ` | Shows normal Linux permissions, ownership and SELinux context together. |
+
+### Notes
+
+SELinux is enabled and running in enforcing mode.
+
+The loaded SELinux policy is `targeted`, which is the common policy type used on RHEL systems.
+
+The shared directories under `/srv/company` currently use the SELinux context `unconfined_u:object_r:var_t:s0`.
+
+Normal Linux permissions and SELinux labels are separate security layers. The earlier permission work controls user and group access, while SELinux contexts provide an additional policy-based access control layer.
+
+The shared directories still show the expected Linux permissions and group ownership:
+
+* `/srv/company/development` is assigned to the `developers` group.
+* `/srv/company/audit` is assigned to the `auditors` group.
+* `/srv/company/restricted` is assigned to the `restricted` group.
+* The setgid bit is still visible through the `drwxrws---` permission pattern.
+
+No SELinux policy changes were made in this part. This part was a review and documentation step only.
+
+### Evidence
+
+Screenshot:
+
+![screenshot-07-rhel-selinux-basics.png](screenshots/screenshot-07-rhel-selinux-basics.png)
+
