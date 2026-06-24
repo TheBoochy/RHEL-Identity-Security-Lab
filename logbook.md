@@ -381,3 +381,145 @@ This part creates the sudo access foundation for later security testing and perm
 Screenshot:
 
 ![screenshot-04-rhel-sudo-policy.png](screenshots/screenshot-04-rhel-sudo-policy.png)
+
+---
+
+## 2026-06-24 — Part 5: Shared directory permissions
+
+### Goal
+
+Create shared Linux directories with role-based group ownership and permissions.
+
+This part documents how shared folders can be controlled using Linux ownership, group permissions and the setgid permission bit.
+
+### Work completed
+
+* Created the main shared directory structure under `/srv/company`.
+* Created shared directories for:
+
+  * development
+  * audit
+  * restricted
+
+* Set group ownership for each shared directory.
+* Applied restricted permissions with `chmod 2770`.
+* Verified that the setgid bit was active on the shared directories.
+* Tested that `devuser1` could create a file inside the development directory.
+* Confirmed that the development test file inherited the `developers` group.
+* Confirmed that `devuser1` could not access the audit directory.
+* Tested that `audituser` could create a file inside the audit directory.
+* Confirmed that the audit test file inherited the `auditors` group.
+* Confirmed that `audituser` could not access the development directory.
+* Used `sudo ls` for final verification of directory permissions and test files.
+* Saved screenshot evidence of the shared directory permissions and test files.
+
+### Directory plan
+
+| Directory | Owner | Group | Purpose |
+|---|---|---|---|
+| `/srv/company` | root | root | Main shared company directory |
+| `/srv/company/development` | root | developers | Shared directory for developer users |
+| `/srv/company/audit` | root | auditors | Shared directory for audit users |
+| `/srv/company/restricted` | root | restricted | Shared directory for restricted users |
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Development directory group | developers |
+| Audit directory group | auditors |
+| Restricted directory group | restricted |
+| Development directory permissions | drwxrws--- |
+| Audit directory permissions | drwxrws--- |
+| Restricted directory permissions | drwxrws--- |
+| Setgid on shared directories | Confirmed |
+| Developer test user | devuser1 |
+| Developer test file | `/srv/company/development/dev-test.txt` |
+| Developer test file ownership | devuser1 developers |
+| devuser1 access to development | Confirmed |
+| devuser1 access to audit | Denied |
+| Audit test user | audituser |
+| Audit test file | `/srv/company/audit/audit-test.txt` |
+| Audit test file ownership | audituser auditors |
+| audituser access to audit | Confirmed |
+| audituser access to development | Denied |
+
+### Commands used
+
+```bash
+sudo mkdir -p /srv/company/development
+sudo mkdir -p /srv/company/audit
+sudo mkdir -p /srv/company/restricted
+
+sudo chown root:developers /srv/company/development
+sudo chown root:auditors /srv/company/audit
+sudo chown root:restricted /srv/company/restricted
+
+sudo chmod 2770 /srv/company/development
+sudo chmod 2770 /srv/company/audit
+sudo chmod 2770 /srv/company/restricted
+
+ls -ld /srv/company
+ls -ld /srv/company/development
+ls -ld /srv/company/audit
+ls -ld /srv/company/restricted
+
+su - devuser1
+touch /srv/company/development/dev-test.txt
+ls -l /srv/company/development/dev-test.txt
+ls /srv/company/audit
+exit
+
+su - audituser
+touch /srv/company/audit/audit-test.txt
+ls -l /srv/company/audit/audit-test.txt
+ls /srv/company/development
+exit
+
+sudo ls -ld /srv/company /srv/company/development /srv/company/audit /srv/company/restricted
+sudo ls -l /srv/company/development
+sudo ls -l /srv/company/audit
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `sudo mkdir -p` | Creates directories, including parent directories if needed. |
+| `sudo chown root:group` | Sets the owner to `root` and assigns the directory to the correct role-based group. |
+| `sudo chmod 2770` | Gives full access to owner and group, blocks others and enables setgid inheritance. |
+| `ls -ld` | Shows permissions, owner and group for the directory itself. |
+| `su - devuser1` | Switches to the developer test user. |
+| `touch` | Creates an empty test file. |
+| `ls -l` | Shows file ownership, group ownership and permissions. |
+| `ls /srv/company/audit` | Tests whether `devuser1` can access the audit directory. |
+| `su - audituser` | Switches to the audit test user. |
+| `ls /srv/company/development` | Tests whether `audituser` can access the development directory. |
+| `exit` | Leaves the switched user session and returns to the previous user. |
+| `sudo ls` | Lists protected directory contents with administrator privileges for final verification. |
+
+### Notes
+
+The shared directories were created under `/srv/company` to represent company-style role-based storage.
+
+The development, audit and restricted directories were owned by `root` and assigned to their matching role-based groups.
+
+The permission mode `2770` was used. The first digit, `2`, enables the setgid bit on the directory. This makes new files created inside the directory inherit the directory group.
+
+The permissions appeared as `drwxrws---`, where the `s` confirms that setgid is active.
+
+The `devuser1` account successfully created `dev-test.txt` in the development directory, and the file inherited the `developers` group.
+
+The `audituser` account successfully created `audit-test.txt` in the audit directory, and the file inherited the `auditors` group.
+
+Access tests confirmed that `devuser1` could not list the audit directory and that `audituser` could not list the development directory.
+
+When logged in as `vulkan`, direct listing of the development and audit directory contents returned permission denied because `vulkan` is not a member of those role-based groups. `sudo ls` was used for final verification.
+
+This part demonstrates basic least-privilege access control using Linux groups, ownership, directory permissions and setgid inheritance.
+
+### Evidence
+
+Screenshot:
+
+![screenshot-05-rhel-shared-directory-permissions.png](screenshots/screenshot-05-rhel-shared-directory-permissions.png)
