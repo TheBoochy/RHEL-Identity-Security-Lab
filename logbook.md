@@ -523,3 +523,84 @@ This part demonstrates basic least-privilege access control using Linux groups, 
 Screenshot:
 
 ![screenshot-05-rhel-shared-directory-permissions.png](screenshots/screenshot-05-rhel-shared-directory-permissions.png)
+
+---
+
+## 2026-06-24 — Part 6: ACL tooling and repository limitation
+
+### Goal
+
+Check whether ACL permissions can be configured on the RHEL server and verify whether the required ACL tools are available.
+
+This part was planned to use ACLs to give `audituser` limited read access to the development directory without adding the user to the `developers` group.
+
+### Work completed
+
+* Checked whether the ACL management tools `setfacl` and `getfacl` were available.
+* Verified that neither ACL tool was installed.
+* Checked whether the `acl` package was installed.
+* Attempted to install the `acl` package with `dnf`.
+* Confirmed that package installation could not continue because the system is not registered and has no enabled repositories.
+* Checked repository availability with `dnf repolist`.
+* Checked Red Hat subscription status with `subscription-manager status`.
+* Re-ran `subscription-manager status` with `sudo` after the non-root command reported that root access was required.
+* Documented the ACL tooling and repository limitation.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| `setfacl` availability | Not installed |
+| `getfacl` availability | Not installed |
+| `acl` package status | Not installed |
+| Package installation attempt | Failed |
+| Repository status | No repositories available |
+| Subscription status | Not registered |
+| ACL configuration | Not completed due to missing tools and unavailable repositories |
+
+### Commands used
+
+```bash
+which setfacl
+which getfacl
+rpm -q acl
+sudo dnf install -y acl
+sudo dnf repolist
+subscription-manager status
+sudo subscription-manager status
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `which setfacl` | Checks whether the `setfacl` command is available in the system path. |
+| `which getfacl` | Checks whether the `getfacl` command is available in the system path. |
+| `rpm -q acl` | Checks whether the `acl` package is installed. |
+| `sudo dnf install -y acl` | Attempts to install the ACL tools package. |
+| `sudo dnf repolist` | Lists enabled software repositories for package installation. |
+| `subscription-manager status` | Checks Red Hat subscription status as the current user. |
+| `sudo subscription-manager status` | Checks Red Hat subscription status with administrator privileges. |
+
+### Notes
+
+The ACL tools `setfacl` and `getfacl` were not installed on the system.
+
+The `acl` package was also not installed. An installation attempt using `dnf` failed because the system is not registered with a Red Hat entitlement server and no repositories are enabled.
+
+The repository check confirmed that no repositories were available. The subscription status check confirmed that the system is not registered.
+
+Because the required ACL tools could not be installed, ACL permission configuration was not completed in this lab environment.
+
+This is a realistic system administration limitation. Future remediation would require registering the RHEL system with Red Hat subscription management or enabling a valid repository source before installing the missing ACL tools.
+
+This part demonstrates troubleshooting of missing Linux administration tools, package availability, repository configuration and subscription state.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-06a-rhel-acl-tools-unavailable.png](screenshots/screenshot-06a-rhel-acl-tools-unavailable.png)
+
+![screenshot-06b-rhel-repository-status.png](screenshots/screenshot-06b-rhel-repository-status.png)
+
