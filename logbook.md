@@ -782,3 +782,95 @@ Screenshot:
 
 ![screenshot-08-rhel-firewalld-review.png](screenshots/screenshot-08-rhel-firewalld-review.png)
 
+
+---
+
+## 2026-06-24 — Part 9: Password and account policy
+
+### Goal
+
+Review password and account policy settings for test users and apply a basic password aging policy to the admin test account.
+
+This part documents how Linux account aging settings can be reviewed and changed with `chage`, how password status can be checked with `passwd -S`, and how failed login records can be reviewed with `faillock`.
+
+### Work completed
+
+* Reviewed the current password aging settings for `rheladmin`.
+* Reviewed the current password aging settings for `restricteduser`.
+* Checked password status for `rheladmin`.
+* Checked password status for `restricteduser`.
+* Applied a password aging policy to `rheladmin`.
+* Verified the updated password aging policy for `rheladmin`.
+* Verified the updated password status values for `rheladmin`.
+* Checked failed login records for `restricteduser` with `faillock`.
+* Saved screenshot evidence of the password and account policy review.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Admin test user | rheladmin |
+| Restricted test user | restricteduser |
+| Initial `rheladmin` maximum password age | 99999 days |
+| Initial `rheladmin` minimum password age | 0 days |
+| Initial `rheladmin` warning period | 7 days |
+| Initial `restricteduser` maximum password age | 99999 days |
+| Initial `restricteduser` minimum password age | 0 days |
+| Initial `restricteduser` warning period | 7 days |
+| `rheladmin` password status | Password set |
+| `restricteduser` password status | Password set |
+| Updated `rheladmin` minimum password age | 7 days |
+| Updated `rheladmin` maximum password age | 90 days |
+| Updated `rheladmin` warning period | 14 days |
+| Updated `rheladmin` password expiry date | Sep 22, 2026 |
+| `restricteduser` failed login records | No failed entries shown |
+
+### Commands used
+
+```bash
+sudo chage -l rheladmin
+sudo chage -l restricteduser
+
+sudo passwd -S rheladmin
+sudo passwd -S restricteduser
+
+sudo chage -M 90 -m 7 -W 14 rheladmin
+
+sudo chage -l rheladmin
+sudo passwd -S rheladmin
+
+sudo faillock --user restricteduser
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| `sudo chage -l rheladmin` | Lists password aging settings for the admin test user. |
+| `sudo chage -l restricteduser` | Lists password aging settings for the restricted test user. |
+| `sudo passwd -S rheladmin` | Shows password status and aging values for `rheladmin`. |
+| `sudo passwd -S restricteduser` | Shows password status and aging values for `restricteduser`. |
+| `sudo chage -M 90 -m 7 -W 14 rheladmin` | Sets a password policy for `rheladmin` with 90 days maximum age, 7 days minimum age and 14 days warning period. |
+| `sudo faillock --user restricteduser` | Shows failed login records for `restricteduser`. |
+
+### Notes
+
+Before the policy change, both `rheladmin` and `restricteduser` had passwords that did not expire. Their maximum password age was set to `99999` days, the minimum password age was `0` days and the warning period was `7` days.
+
+A password aging policy was applied to `rheladmin` only. The new policy sets the minimum number of days between password changes to `7`, the maximum number of days between password changes to `90`, and the warning period before password expiry to `14` days.
+
+After the change, `rheladmin` showed a password expiry date of Sep 22, 2026.
+
+The `passwd -S` output confirmed the updated values for `rheladmin` as `7 90 14 -1`.
+
+The `restricteduser` account was reviewed but not changed in this part.
+
+The `faillock` check for `restricteduser` did not show any failed login records. This is acceptable and means there were no recorded failed authentication entries for that user at the time of testing.
+
+This part demonstrates basic account policy review, password aging configuration and failed login record inspection.
+
+### Evidence
+
+Screenshot:
+
+![screenshot-09-rhel-password-account-policy.png](screenshots/screenshot-09-rhel-password-account-policy.png)
